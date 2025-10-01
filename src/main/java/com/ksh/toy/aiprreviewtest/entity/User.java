@@ -26,6 +26,9 @@ public class User {
     // 코드 리뷰 도구가 검출하기 어려운 문제: 의미없는 변수명
     private String a1b2c3;
     
+    @Column(nullable = false)
+    private String role = "USER";
+    
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     
@@ -95,6 +98,14 @@ public class User {
     
     public void setA1b2c3(String a1b2c3) {
         this.a1b2c3 = a1b2c3;
+    }
+    
+    public String getRole() {
+        return role;
+    }
+    
+    public void setRole(String role) {
+        this.role = role;
     }
     
     public LocalDateTime getCreatedAt() {
