@@ -101,7 +101,7 @@ AI 검출 난이도: ✅ Easy / ⚠️ Medium / 🔍 Hard
 - [발생 가능한 피해]
 
 **개선안:**
-```java
+```suggestion
 [수정된 코드]
 ```
 
@@ -148,7 +148,7 @@ User 조회 시 연관된 Posts를 LAZY 로딩하지만,
 - 응답 시간: ~2000ms → ~50ms (개선 후)
 
 **개선안:**
-```java
+```suggestion
 @Query("SELECT u FROM User u LEFT JOIN FETCH u.posts WHERE u.id = :id")
 User findByIdWithPosts(@Param("id") Long id);
 ```
@@ -273,8 +273,10 @@ PR 전체에 대한 총평을 하나의 comment로 작성합니다.
 ```markdown
 ## 📊 PR Review Summary
 
-### 변경 사항 개요
-[3-5 문장으로 PR의 핵심 내용 요약]
+### 주요 구현 사항
+* [핵심 기능/변경사항 1]
+* [핵심 기능/변경사항 2]
+* [핵심 기능/변경사항 3]
 
 ### 주요 우려사항 TOP 3
 1. 🔴 [가장 심각한 문제]
@@ -300,23 +302,6 @@ PR 전체에 대한 총평을 하나의 comment로 작성합니다.
 | 🔵 Minor | X개 |
 | 💡 Suggestion | X개 |
 
-### 🤖 AI Detection Analysis
-| 난이도 | 이슈 수 | 비율 |
-|--------|---------|------|
-| ✅ Easy | X개 | X% |
-| ⚠️ Medium | X개 | X% |
-| 🔍 Hard | X개 | X% |
-
-### 🎯 우선순위 Action Items
-#### P0 - Blocker (머지 전 필수)
-- [ ] `파일명:줄번호` - [이슈 한 줄 요약]
-
-#### P1 - Critical (릴리즈 전 필수)
-- [ ] `파일명:줄번호` - [이슈 한 줄 요약]
-
-#### P2 - Major (개선 권장)
-- [ ] `파일명:줄번호` - [이슈 한 줄 요약]
-
 ### ✅ 잘된 부분
 - ✅ [칭찬할 점 1]
 - ✅ [칭찬할 점 2]
@@ -330,90 +315,37 @@ PR 전체에 대한 총평을 하나의 comment로 작성합니다.
 
 **형식:**
 ```markdown
-## 📄 변경된 파일 요약
+## Walkthrough
+이 PR은 [프로젝트/기능명]에 대한 [변경 유형]을 포함합니다. [주요 도메인/계층]에 걸쳐 [엔티티/리포지토리/서비스/컨트롤러 등]이 신규 추가/수정되었으며, [주요 기능 1], [주요 기능 2], [주요 기능 3]이 구현되었습니다. [설정/의존성/기타 변경사항]도 포함됩니다.
 
-### 주요 변경 파일 목록
-총 X개 파일 변경 (+X, -X)
-
-#### 🔴 심각한 보안 이슈 포함 파일
-1. **`AppConfig.java`** - CORS 설정, 하드코딩된 DB 정보
-2. **`User.java`** - 평문 비밀번호, API 키 노출
-3. **`UserRepository.java`** - SQL Injection 취약점
-
-#### 🏗️ 아키텍처 구조
-```mermaid
-graph TB
-    A[Web Layer] --> B[Controller Layer]
-    B --> C[Service Layer]
-    C --> D[Repository Layer]
-    D --> E[(H2 Database)]
-
-    B --> F[UserController]
-    B --> G[PostController]
-    B --> H[CommentController]
-
-    C --> I[UserService]
-    C --> J[PostService]
-    C --> K[CommentService]
-
-    D --> L[UserRepository]
-    D --> M[PostRepository]
-    D --> N[CommentRepository]
-```
-
-### 파일별 주요 이슈 요약
-
-#### Configuration
-- **`AppConfig.java`** (62 lines)
-  - 🔴 Blocker: 하드코딩된 DB 비밀번호 (line 47)
-  - 🔴 Blocker: 위험한 CORS 설정 (line 28-31)
-  - 🔵 Minor: 사용되지 않는 메서드 (line 40-42)
-
-- **`DataInitializer.java`** (109 lines)
-  - 🔴 Blocker: 평문 비밀번호로 초기 데이터 생성 (line 39, 47, 55)
-  - 🟡 Major: 필드 주입 패턴 (line 16-22)
-
-#### Entity Layer
-- **`User.java`** (163 lines)
-  - 🔴 Blocker: 하드코딩된 기본 비밀번호 (line 24)
-  - 🔴 Blocker: 하드코딩된 API 키/토큰 (line 46-47)
-  - 🟠 Critical: CascadeType.ALL 위험성 (line 39-43)
-  - 🔵 Minor: 의미 없는 변수명 'a1b2c3' (line 27)
-
-- **`Post.java`**, **`Comment.java`**
-  - 유사한 패턴의 이슈들 포함
-
-#### Repository Layer
-- **`UserRepository.java`** (47 lines)
-  - 🔴 Blocker: SQL Injection 취약점 (line 22)
-  - 🟡 Major: 성능 문제 쿼리 (line 38)
-
-#### Service Layer
-- **`UserService.java`** (106 lines)
-  - 🟠 Critical: 하드코딩된 민감 정보 (line 18, 26-27)
-  - 🟡 Major: 트랜잭션 관리 부재
-  - 🟡 Major: 필드 주입 패턴 (line 14)
-
-#### Controller Layer
-- **`UserController.java`** (141 lines)
-  - 🔴 Blocker: 하드코딩된 인증 토큰 (line 21)
-  - 🟠 Critical: 엔티티 직접 반환 (line 27-30)
-  - 🟡 Major: 입력값 검증 부재
-  - 🔵 Minor: DTO가 내부 클래스 (line 121-140)
+## Changes
+| Cohort / File(s) | 요약 |
+| --- | --- |
+| **[분류명]**<br>`파일경로1`<br>`파일경로2` | [해당 파일들의 주요 변경사항 요약] |
+| **[분류명]**<br>`파일경로` | [해당 파일의 주요 변경사항 요약] |
+| **엔티티**<br>`.../entity/User.java`<br>`.../entity/Post.java`<br>`.../entity/Comment.java` | users/posts/comments 테이블 매핑, 연관관계, 타임스탬프, 상태/메타 필드, @PreUpdate 콜백 추가. |
+| **리포지토리**<br>`.../repository/UserRepository.java`<br>`.../repository/PostRepository.java`<br>`.../repository/CommentRepository.java` | JPA 리포지토리 및 파생/JPQL/네이티브 쿼리 메서드 다수 추가. |
+| **서비스**<br>`.../service/UserService.java`<br>`.../service/PostService.java`<br>`.../service/CommentService.java` | CRUD, 보조 검색, 상태 변경, 민감 데이터 조회 등 비즈니스 로직 추가. |
+| **컨트롤러**<br>`.../controller/UserController.java`<br>`.../controller/PostController.java`<br>`.../controller/CommentController.java` | /api/* REST 엔드포인트(CRUD, 검색, 검증, 메타/민감 데이터 응답)와 요청 DTO 추가. |
+| **설정**<br>`.../config/AppConfig.java`<br>`.../config/DataInitializer.java` | CORS 설정, DB URL 메서드, CommandLineRunner로 기본 데이터 생성. |
+| **예외 처리**<br>`.../exception/GlobalExceptionHandler.java` | 전역 예외 처리기 추가(예외 타입별 응답 분기). |
+| **DTO**<br>`.../dto/ApiResponse.java` | 제네릭 응답 래퍼 및 success/error 팩토리 메서드 추가. |
+| **유틸리티**<br>`.../util/SecurityUtil.java` | 토큰 검증, 암호화, 관리자/자격 증명 조회 메서드 추가. |
+| **리소스**<br>`application.properties`<br>`static/index.html` | H2 인메모리 DB, JPA DDL, 콘솔 설정 및 단일 페이지 UI 추가. |
 
 ### 전체 통계
 | 심각도 | 이슈 수 | 대표 파일 |
 |--------|---------|-----------|
-| 🔴 Blocker | 15개 | AppConfig, User, UserRepository |
-| 🟠 Critical | 8개 | UserController, UserService |
-| 🟡 Major | 12개 | 모든 Service/Controller |
-| 🔵 Minor | 18개 | 전반적 |
+| 🔴 Blocker | X개 | [대표 파일들] |
+| 🟠 Critical | X개 | [대표 파일들] |
+| 🟡 Major | X개 | [대표 파일들] |
+| 🔵 Minor | X개 | [대표 파일들] |
 
 ### 권장 개선 방향
-1. **즉시 수정 필요**: 모든 하드코딩된 비밀번호/토큰 제거
-2. **보안 강화**: Spring Security 도입, DTO 패턴 적용
-3. **아키텍처 개선**: 생성자 주입, 트랜잭션 관리
-4. **코드 품질**: 네이밍 개선, Dead Code 제거
+1. **즉시 수정 필요 (P0)**: 모든 하드코딩된 비밀번호/토큰/API 키 제거, 환경 변수나 Spring Boot의 @ConfigurationProperties 사용
+2. **보안 강화 (P0-P1)**: Spring Security 도입, BCrypt로 비밀번호 해싱, SQL Injection 방지 (Parameterized Query 사용), CORS 설정 제한, DTO 패턴 적용
+3. **아키텍처 개선 (P1-P2)**: 생성자 주입으로 변경, @Transactional 추가, 적절한 예외 처리
+4. **코드 품질 (P2-P3)**: 의미 있는 변수명 사용, Dead Code 제거, 불필요한 복잡성 제거
 ```
 
 ---
@@ -528,55 +460,59 @@ EOF
 
 #### 3. 코드 라인별 Comment 추가 (GitHub Review Comment API 사용)
 
-**중요:** 코드 라인 comment는 `gh pr review` 명령어를 사용합니다.
+**중요:** 여러 개의 코드 라인 comment를 **한 번의 API 호출**로 추가합니다.
+
+GitHub의 Create a review API를 사용하여 모든 이슈를 한번에 등록합니다.
 
 ```bash
-# 각 이슈마다 라인별 comment 추가
-gh pr review {PR_NUMBER} --comment --body "$(cat <<'EOF'
-[파일경로:시작라인-끝라인]
-
-{이슈 제목} | {심각도 이모지} {심각도}
-
-{이슈 상세 설명}
-
-**분류:** {카테고리}
-**AI 검출 난이도:** {난이도}
-
-**문제점:**
-{문제 설명}
-
-**보안 위험 / 성능 영향:**
-- {영향}
-
-**개선 방법:**
-```suggestion
-{수정 코드}
+# 모든 이슈를 한 번에 포함하는 Review 생성
+gh api repos/$REPO_OWNER/$REPO_NAME/pulls/$PR_NUMBER/reviews \
+  -f body="코드 리뷰를 완료했습니다. 아래 라인별 comment를 확인해주세요." \
+  -f event="COMMENT" \
+  -f commit_id="$COMMIT_SHA" \
+  -f comments='[
+    {
+      "path": "src/main/java/com/ksh/toy/aiprreviewtest/entity/User.java",
+      "position": 5,
+      "body": "하드코딩된 비밀번호 | 🔴 Blocker\n\n비밀번호가 평문으로 하드코딩되어 있습니다...\n\n**개선 방법:**\n```suggestion\nprivate String password;\n```"
+    },
+    {
+      "path": "src/main/java/com/ksh/toy/aiprreviewtest/controller/UserController.java",
+      "start_line": 40,
+      "line": 45,
+      "body": "SQL Injection 취약점 | 🔴 Blocker\n\n..."
+    }
+  ]'
 ```
 
-**참고:**
-- {링크}
-EOF
-)"
-```
+**Comments 배열 구조:**
+- `path`: 파일 경로 (repository root 기준)
+- `body`: comment 내용 (마크다운 지원)
+- **단일 라인**: `position` 사용 (diff 내 위치)
+- **범위 라인**: `start_line` (시작 라인) + `line` (끝 라인) 사용
 
-**라인 지정 방법 (gh CLI):**
+**라인 지정 방법:**
 ```bash
-# 단일 라인
-gh api repos/{OWNER}/{REPO}/pulls/{PR_NUMBER}/comments \
-  -f body="comment 내용" \
-  -f path="src/main/java/com/ksh/toy/aiprreviewtest/entity/User.java" \
-  -f commit_id="$(git rev-parse HEAD)" \
-  -F line=24
+# 단일 라인 (position 사용)
+{
+  "path": "file.java",
+  "position": 5,
+  "body": "comment"
+}
 
-# 범위 라인 (start_line ~ line)
-gh api repos/{OWNER}/{REPO}/pulls/{PR_NUMBER}/comments \
-  -f body="comment 내용" \
-  -f path="파일경로" \
-  -f commit_id="$(git rev-parse HEAD)" \
-  -F start_line=22 \
-  -F line=25 \
-  -f start_side="RIGHT"
+# 범위 라인 (start_line + line 사용)
+{
+  "path": "file.java",
+  "start_line": 22,
+  "line": 25,
+  "body": "comment"
+}
 ```
+
+**중요:**
+- `position`은 diff의 위치를 나타냅니다 (파일의 절대 라인 번호가 아님)
+- 범위 지정 시에는 `start_line`(시작)과 `line`(끝)을 함께 사용해야 합니다
+- 단일 라인과 범위 라인 방식은 혼용할 수 없습니다 (둘 중 하나만 선택)
 
 #### 실행 단계별 가이드:
 
@@ -600,21 +536,26 @@ gh pr comment $PR_NUMBER --body "[PR Review Summary 내용]"
 gh pr comment $PR_NUMBER --body "[UserController.java 파일 요약]"
 ```
 
-**STEP B-4: 각 이슈별 라인 Comment 추가**
+**STEP B-4: 모든 이슈를 한 번에 라인 Comment 추가**
 ```bash
-# 각 발견된 이슈마다 gh api 명령어로 라인 comment 추가
-gh api repos/$REPO_OWNER/$REPO_NAME/pulls/$PR_NUMBER/comments \
-  -f body="하드코딩된 비밀번호 | 🔴 Blocker
-
-비밀번호가 평문으로 하드코딩되어 있습니다...
-
-**개선 방법:**
-\`\`\`suggestion
-private String password;
-\`\`\`" \
-  -f path="src/main/java/com/ksh/toy/aiprreviewtest/entity/User.java" \
+# 모든 발견된 이슈를 한 번의 API 호출로 Review에 추가
+gh api repos/$REPO_OWNER/$REPO_NAME/pulls/$PR_NUMBER/reviews \
+  -f body="코드 리뷰를 완료했습니다. 아래 라인별 comment를 확인해주세요." \
+  -f event="COMMENT" \
   -f commit_id="$COMMIT_SHA" \
-  -F line=24
+  -f comments='[
+    {
+      "path": "src/main/java/com/ksh/toy/aiprreviewtest/entity/User.java",
+      "position": 5,
+      "body": "하드코딩된 비밀번호 | 🔴 Blocker\n\n비밀번호가 평문으로 하드코딩되어 있습니다...\n\n**개선 방법:**\n```suggestion\nprivate String password;\n```"
+    },
+    {
+      "path": "src/main/java/com/ksh/toy/aiprreviewtest/controller/UserController.java",
+      "start_line": 40,
+      "line": 45,
+      "body": "SQL Injection 취약점 | 🔴 Blocker\n\n..."
+    }
+  ]'
 ```
 
 ---
@@ -649,18 +590,27 @@ EOF
 )"
 
 # 3. 파일별 Comment 추가
-for file in $(git diff --name-only main...HEAD); do
-  echo "Adding comment for $file..."
-  gh pr comment $PR_NUMBER --body "## 📄 \`$file\` 변경사항 요약..."
-done
+gh pr comment $PR_NUMBER --body "## 📄 전체 파일 요약..."
 
-# 4. 라인별 Comment 추가 (각 이슈마다)
-echo "Adding line-specific comments..."
-gh api repos/$REPO_OWNER/$REPO_NAME/pulls/$PR_NUMBER/comments \
-  -f body="..." \
-  -f path="..." \
+# 4. 모든 라인별 Comment를 한 번에 추가 (Review API 사용)
+echo "Adding all line-specific comments in a single review..."
+gh api repos/$REPO_OWNER/$REPO_NAME/pulls/$PR_NUMBER/reviews \
+  -f body="코드 리뷰를 완료했습니다. 아래 라인별 comment를 확인해주세요." \
+  -f event="COMMENT" \
   -f commit_id="$COMMIT_SHA" \
-  -F line=...
+  -f comments='[
+    {
+      "path": "...",
+      "position": ...,
+      "body": "..."
+    },
+    {
+      "path": "...",
+      "start_line": ...,
+      "line": ...,
+      "body": "..."
+    }
+  ]'
 ```
 
 ### 주의사항
