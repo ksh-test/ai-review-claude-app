@@ -633,7 +633,7 @@ gh api repos/$REPO_OWNER/$REPO_NAME/pulls/$PR_NUMBER/reviews \
    리뷰를 완료했습니다. GitHub PR에 실제로 comment를 추가하시겠습니까? (y/n)
    ```
 
-3. ✅ **사용자가 'y'라고 답하면:**
+3. ✅ **사용자가 'y'라고 답하면 더 이상 질문하지 않고 모든 comment를 추가:**
    - `gh pr comment` 명령어로 PR 전체 요약 추가
    - 각 파일별 요약 comment 추가
    - `gh api` 명령어로 라인별 이슈 comment 추가
