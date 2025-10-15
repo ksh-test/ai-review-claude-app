@@ -537,25 +537,71 @@ gh pr comment $PR_NUMBER --body "[UserController.java 파일 요약]"
 ```
 
 **STEP B-4: 모든 이슈를 한 번에 라인 Comment 추가**
+
+**중요:** 각 이슈를 개별적으로 추가하지 말고, **모든 이슈를 하나의 JSON 파일로 만든 후 한 번에 제출**합니다.
+
 ```bash
-# 모든 발견된 이슈를 한 번의 API 호출로 Review에 추가
-gh api repos/$REPO_OWNER/$REPO_NAME/pulls/$PR_NUMBER/reviews \
-  -f body="코드 리뷰를 완료했습니다. 아래 라인별 comment를 확인해주세요." \
-  -f event="COMMENT" \
-  -f commit_id="$COMMIT_SHA" \
-  -f comments='[
+# 1단계: 모든 이슈를 포함하는 JSON 파일 생성
+cat > review-comments.json <<'EOF'
+{
+  "body": "🤖 **AI Code Review 완료**\n\n총 X개의 이슈를 발견했습니다:\n- 🔴 Blocker: X개\n- 🟠 Critical: X개\n- 🟡 Major: X개\n- 🔵 Minor: X개\n\n주요 보안 취약점과 아키텍처 개선 사항에 대한 상세한 리뷰를 아래에 남겼습니다.",
+  "event": "COMMENT",
+  "comments": [
     {
-      "path": "src/main/java/com/ksh/toy/aiprreviewtest/entity/User.java",
-      "position": 5,
-      "body": "하드코딩된 비밀번호 | 🔴 Blocker\n\n비밀번호가 평문으로 하드코딩되어 있습니다...\n\n**개선 방법:**\n```suggestion\nprivate String password;\n```"
+      "path": "src/main/java/com/ksh/toy/aiprreviewtest/config/AppConfig.java",
+      "line": 47,
+      "body": "## 하드코딩된 데이터베이스 비밀번호 | 🔴 Blocker\n\n데이터베이스 URL에 관리자 계정과 비밀번호가 평문으로 하드코딩되어 있습니다.\n\n**분류:** Security - OWASP A02 (Cryptographic Failures)\n**AI 검출 난이도:** ✅ Easy\n\n**개선 방법:**\n```suggestion\n@Value(\"${spring.datasource.url}\")\nprivate String databaseUrl;\n```"
     },
     {
-      "path": "src/main/java/com/ksh/toy/aiprreviewtest/controller/UserController.java",
-      "start_line": 40,
-      "line": 45,
-      "body": "SQL Injection 취약점 | 🔴 Blocker\n\n..."
+      "path": "src/main/java/com/ksh/toy/aiprreviewtest/config/AppConfig.java",
+      "start_line": 28,
+      "line": 31,
+      "body": "## 위험한 CORS 설정 | 🔴 Blocker\n\n모든 Origin(`*`)에서의 요청을 허용하고 있어, CSRF 공격에 취약합니다.\n\n**분류:** Security - OWASP A05\n**AI 검출 난이도:** ✅ Easy\n\n**개선 방법:**\n```suggestion\nconfiguration.setAllowedOrigins(Arrays.asList(\n    \"https://example.com\"\n));\n```"
+    },
+    {
+      "path": "src/main/java/com/ksh/toy/aiprreviewtest/entity/User.java",
+      "line": 24,
+      "body": "## 평문 기본 비밀번호 | 🔴 Blocker\n\n엔티티 클래스에 기본 비밀번호가 평문으로 하드코딩되어 있습니다.\n\n**분류:** Security - OWASP A02\n**AI 검출 난이도:** ✅ Easy"
     }
-  ]'
+  ]
+}
+EOF
+
+# 2단계: GitHub Reviews API로 한 번에 제출
+gh api repos/$REPO_OWNER/$REPO_NAME/pulls/$PR_NUMBER/reviews \
+  --method POST \
+  --input review-comments.json
+
+# 3단계: 임시 파일 삭제
+rm review-comments.json
+```
+
+**JSON 구조 설명:**
+```json
+{
+  "body": "리뷰 전체 요약 메시지",
+  "event": "COMMENT",  // 또는 "APPROVE", "REQUEST_CHANGES"
+  "comments": [
+    {
+      "path": "파일 경로 (repository root 기준)",
+      "line": 단일 라인 번호,
+      "body": "comment 내용 (마크다운 지원)"
+    },
+    {
+      "path": "파일 경로",
+      "start_line": 시작 라인,
+      "line": 끝 라인,
+      "body": "comment 내용"
+    }
+  ]
+}
+```
+
+**주의사항:**
+1. `line` 또는 `start_line` + `line` 조합 사용 (diff의 라인 번호)
+2. 한 번의 API 호출로 모든 comment 제출 → Rate limiting 방지
+3. JSON 파일을 먼저 생성하여 디버깅 용이
+4. 최대 comment 수 제한 확인 (GitHub API 제약 확인)
 ```
 
 ---
@@ -594,23 +640,29 @@ gh pr comment $PR_NUMBER --body "## 📄 전체 파일 요약..."
 
 # 4. 모든 라인별 Comment를 한 번에 추가 (Review API 사용)
 echo "Adding all line-specific comments in a single review..."
-gh api repos/$REPO_OWNER/$REPO_NAME/pulls/$PR_NUMBER/reviews \
-  -f body="코드 리뷰를 완료했습니다. 아래 라인별 comment를 확인해주세요." \
-  -f event="COMMENT" \
-  -f commit_id="$COMMIT_SHA" \
-  -f comments='[
+
+# JSON 파일 생성 (모든 이슈를 한 번에 포함)
+cat > review-comments.json <<'EOF'
+{
+  "body": "🤖 AI Code Review 완료\n\n발견된 이슈를 아래에 정리했습니다.",
+  "event": "COMMENT",
+  "comments": [
     {
-      "path": "...",
-      "position": ...,
-      "body": "..."
-    },
-    {
-      "path": "...",
-      "start_line": ...,
-      "line": ...,
-      "body": "..."
+      "path": "파일경로",
+      "line": 라인번호,
+      "body": "이슈 내용"
     }
-  ]'
+  ]
+}
+EOF
+
+# Reviews API로 한 번에 제출
+gh api repos/$REPO_OWNER/$REPO_NAME/pulls/$PR_NUMBER/reviews \
+  --method POST \
+  --input review-comments.json
+
+# 임시 파일 삭제
+rm review-comments.json
 ```
 
 ### 주의사항
