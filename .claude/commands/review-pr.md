@@ -324,51 +324,97 @@ PR 전체에 대한 총평을 하나의 comment로 작성합니다.
 
 ---
 
-### 💬 COMMENT TYPE 2: 파일별 요약 (File-level Comments)
+### 💬 COMMENT TYPE 2: 전체 파일 요약 (All Files Summary)
 
-각 변경된 파일마다 하나의 comment를 작성합니다.
+**모든 변경된 파일을 하나의 comment로 작성합니다.**
 
 **형식:**
 ```markdown
-## 📄 `파일명` 변경사항 요약
+## 📄 변경된 파일 요약
 
-### 주요 변경 내용
-- [변경사항 1]
-- [변경사항 2]
-- [변경사항 3]
+### 주요 변경 파일 목록
+총 X개 파일 변경 (+X, -X)
 
-### 플로우 다이어그램
+#### 🔴 심각한 보안 이슈 포함 파일
+1. **`AppConfig.java`** - CORS 설정, 하드코딩된 DB 정보
+2. **`User.java`** - 평문 비밀번호, API 키 노출
+3. **`UserRepository.java`** - SQL Injection 취약점
+
+#### 🏗️ 아키텍처 구조
 ```mermaid
-sequenceDiagram
-    participant Client
-    participant Controller
-    participant Service
-    participant Repository
-    participant Database
+graph TB
+    A[Web Layer] --> B[Controller Layer]
+    B --> C[Service Layer]
+    C --> D[Repository Layer]
+    D --> E[(H2 Database)]
 
-    Client->>Controller: HTTP Request
-    Controller->>Service: Business Logic Call
-    Service->>Repository: Data Access
-    Repository->>Database: Query
-    Database-->>Repository: Result
-    Repository-->>Service: Entity
-    Service-->>Controller: DTO
-    Controller-->>Client: HTTP Response
-```
-(또는 적절한 다이어그램 타입 사용: flowchart, classDiagram, etc.)
+    B --> F[UserController]
+    B --> G[PostController]
+    B --> H[CommentController]
 
-### 발견된 이슈
-- 🔴 Blocker: X개
-- 🟠 Critical: X개
-- 🟡 Major: X개
-- 🔵 Minor: X개
+    C --> I[UserService]
+    C --> J[PostService]
+    C --> K[CommentService]
 
-### 권장사항
-[이 파일에 대한 전체적인 개선 방향]
+    D --> L[UserRepository]
+    D --> M[PostRepository]
+    D --> N[CommentRepository]
 ```
 
-**파일명 지정 방법:**
-- `src/main/java/com/ksh/toy/aiprreviewtest/controller/UserController.java`
+### 파일별 주요 이슈 요약
+
+#### Configuration
+- **`AppConfig.java`** (62 lines)
+  - 🔴 Blocker: 하드코딩된 DB 비밀번호 (line 47)
+  - 🔴 Blocker: 위험한 CORS 설정 (line 28-31)
+  - 🔵 Minor: 사용되지 않는 메서드 (line 40-42)
+
+- **`DataInitializer.java`** (109 lines)
+  - 🔴 Blocker: 평문 비밀번호로 초기 데이터 생성 (line 39, 47, 55)
+  - 🟡 Major: 필드 주입 패턴 (line 16-22)
+
+#### Entity Layer
+- **`User.java`** (163 lines)
+  - 🔴 Blocker: 하드코딩된 기본 비밀번호 (line 24)
+  - 🔴 Blocker: 하드코딩된 API 키/토큰 (line 46-47)
+  - 🟠 Critical: CascadeType.ALL 위험성 (line 39-43)
+  - 🔵 Minor: 의미 없는 변수명 'a1b2c3' (line 27)
+
+- **`Post.java`**, **`Comment.java`**
+  - 유사한 패턴의 이슈들 포함
+
+#### Repository Layer
+- **`UserRepository.java`** (47 lines)
+  - 🔴 Blocker: SQL Injection 취약점 (line 22)
+  - 🟡 Major: 성능 문제 쿼리 (line 38)
+
+#### Service Layer
+- **`UserService.java`** (106 lines)
+  - 🟠 Critical: 하드코딩된 민감 정보 (line 18, 26-27)
+  - 🟡 Major: 트랜잭션 관리 부재
+  - 🟡 Major: 필드 주입 패턴 (line 14)
+
+#### Controller Layer
+- **`UserController.java`** (141 lines)
+  - 🔴 Blocker: 하드코딩된 인증 토큰 (line 21)
+  - 🟠 Critical: 엔티티 직접 반환 (line 27-30)
+  - 🟡 Major: 입력값 검증 부재
+  - 🔵 Minor: DTO가 내부 클래스 (line 121-140)
+
+### 전체 통계
+| 심각도 | 이슈 수 | 대표 파일 |
+|--------|---------|-----------|
+| 🔴 Blocker | 15개 | AppConfig, User, UserRepository |
+| 🟠 Critical | 8개 | UserController, UserService |
+| 🟡 Major | 12개 | 모든 Service/Controller |
+| 🔵 Minor | 18개 | 전반적 |
+
+### 권장 개선 방향
+1. **즉시 수정 필요**: 모든 하드코딩된 비밀번호/토큰 제거
+2. **보안 강화**: Spring Security 도입, DTO 패턴 적용
+3. **아키텍처 개선**: 생성자 주입, 트랜잭션 관리
+4. **코드 품질**: 네이밍 개선, Dead Code 제거
+```
 
 ---
 
