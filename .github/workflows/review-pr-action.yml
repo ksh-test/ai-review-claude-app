@@ -18,5 +18,11 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Enable progress tracking
+          track_progress: true
+
+          
           prompt: "/review-pr"
-          claude_args: "--max-turns 5"
+          claude_args: |
+            --max-turns 5
+            --model claude-opus-4-6
